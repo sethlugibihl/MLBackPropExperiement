@@ -261,9 +261,10 @@ class NeuralNetwork:
  		  
       epoch += 1
 	  
-      if epoch % 10 == 0:
-        mse = self.meanSquaredError(trainData)
-        print("epoch = " + str(epoch) + " ms error = %0.4f " % mse)
+      # PRINT
+      # if epoch % 100 == 0:
+      #   mse = self.meanSquaredError(trainData)
+      #   print("epoch = " + str(epoch) + " ms error = %0.4f " % mse)
     # end while
     
     result = self.getWeights()
@@ -338,49 +339,67 @@ class NeuralNetwork:
 # end class NeuralNetwork
 
 def main(hiddenLayerNodes, learningRate, epochs, trainingDataMatrix, testingDataMatrix):
-  print("\nBegin NN back-propagation demo \n")
+  # print("\nBegin NN back-propagation demo \n")
   pv = sys.version
   npv = np.version.version 
-  print("Using Python version " + str(pv) +
-    "\n and NumPy version "  + str(npv))
+  # print("Using Python version " + str(pv) +
+  #   "\n and NumPy version "  + str(npv))
   
   numInput = 4
-  numHidden = 5
+  numHidden = hiddenLayerNodes
   numOutput = 3
-  print("\nCreating a %d-%d-%d neural network " %
-    (numInput, numHidden, numOutput) )
+  # PRINT
+  # print("\nCreating a %d-%d-%d neural network " %
+  #   (numInput, numHidden, numOutput) )
   nn = NeuralNetwork(numInput, numHidden, numOutput, seed=3)
   
-  print("\nLoading Iris training and test data ")
+  # print("\nLoading Iris training and test data ")
   trainDataPath = "irisTrainData.txt"
   trainDataMatrix = loadFile(trainDataPath)
-  print("\nTest data: ")
-  showMatrixPartial(trainDataMatrix, 4, 1, True)
+  # PRINT
+  # print("\nTest data: ")
+  # showMatrixPartial(trainDataMatrix, 4, 1, True)
   testDataPath = "irisTestData.txt"
   testDataMatrix = loadFile(testDataPath)
   
-  maxEpochs = 1000
-  learnRate = 0.01
-  print("\nSetting maxEpochs = " + str(maxEpochs))
-  print("Setting learning rate = %0.3f " % learnRate)
-  print("\nStarting training")
+  maxEpochs = epochs
+  learnRate = learningRate
+  print("\nMax Epochs: " + str(maxEpochs))
+  print("Learning: %0.3f " % learnRate)
+  print("Hidden Nodes: " + str(hiddenLayerNodes))
+  # print("\nStarting training")
   nn.train(trainDataMatrix, maxEpochs, learnRate)
-  print("Training complete")
+  # print("Training complete")
   
   accTrain = nn.accuracy(trainDataMatrix)
   accTest = nn.accuracy(testDataMatrix)
   
-  print("\nAccuracy on 120-item train data = %0.4f " % accTrain)
+  print("Accuracy on 120-item train data = %0.4f " % accTrain)
   print("Accuracy on 30-item test data   = %0.4f " % accTest)
-  
-  print("\nEnd demo \n")
+  print('\n')
+  # print("\nEnd demo \n")
    
 
 def testingFramework():
+  minEpochs = 100
+  maxEpochs = 1000
   minHLNodes = 2
   maxHLNodes = 9
-  minlearningRate = [0.001, 0.005, 0.01, 0.05, 0.07, 0.1, 0.3]
-  
+  learningRates = [0.005, 0.006, 0.007, 0.008, 0.009, 0.01, 0.02, 0.03]
+
+  # Iterate over iris data and generate traning data matrix and testing data matrix
+
+  # inFile=open("irisData.csv","r")
+  # lines = inFile.readlines()
+  # for line in lines:
+  #   print(line)
+
+  for epoch in range(minEpochs, maxEpochs, 100):
+    for node in range(minHLNodes, maxHLNodes):
+      for learningRate in learningRates:
+        main(node, learningRate, epoch, 0, 0)
+
+
 
 testingFramework()
 
