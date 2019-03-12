@@ -2,6 +2,8 @@
 # nn_backprop.py
 # Python 3.x
 
+import matplotlib.pyplot as plt
+import time
 import numpy as np
 import random
 import math
@@ -9,7 +11,7 @@ import sys
 
 # helper functions
 
-def loadFile(df):
+def loadFile(df, testDataPercent):
   # load a comma-delimited text file into an np matrix
   resultList = []
   f = open(df, 'r')
@@ -19,7 +21,17 @@ def loadFile(df):
     fVals = list(map(np.float32, sVals))  # [1.0, 2.0, 3.0]
     resultList.append(fVals)  # [[1.0, 2.0, 3.0] , [4.0, 5.0, 6.0]]
   f.close()
-  return np.asarray(resultList, dtype=np.float32)  # not necessary
+
+  random.shuffle(resultList)
+  testingList = []
+  testingListSize = int(len(resultList)*testDataPercent)
+
+  while len(testingList) < testingListSize:
+    idx = random.randint(0, len(resultList))
+    testingList.append(resultList.pop(idx))
+  
+
+  return np.asarray(resultList, dtype=np.float32), np.asarray(testingList, dtype=np.float32)  # not necessary
 # end loadFile
   
 def showVector(v, dec):
@@ -338,7 +350,7 @@ class NeuralNetwork:
 
 # end class NeuralNetwork
 
-def main(hiddenLayerNodes, learningRate, epochs, trainingDataMatrix, testingDataMatrix):
+def main(hiddenLayerNodes, learningRate, epochs, trainDataMatrix, testDataMatrix):
   # print("\nBegin NN back-propagation demo \n")
   pv = sys.version
   npv = np.version.version 
@@ -354,13 +366,13 @@ def main(hiddenLayerNodes, learningRate, epochs, trainingDataMatrix, testingData
   nn = NeuralNetwork(numInput, numHidden, numOutput, seed=3)
   
   # print("\nLoading Iris training and test data ")
-  trainDataPath = "irisTrainData.txt"
-  trainDataMatrix = loadFile(trainDataPath)
+  # trainDataPath = "irisTrainData.txt"
+  # trainDataMatrix = loadFile(trainDataPath)
   # PRINT
   # print("\nTest data: ")
   # showMatrixPartial(trainDataMatrix, 4, 1, True)
-  testDataPath = "irisTestData.txt"
-  testDataMatrix = loadFile(testDataPath)
+  # testDataPath = "irisTestData.txt"
+  # testDataMatrix = loadFile(testDataPath)
   
   maxEpochs = epochs
   learnRate = learningRate
@@ -378,26 +390,37 @@ def main(hiddenLayerNodes, learningRate, epochs, trainingDataMatrix, testingData
   print("Accuracy on 30-item test data   = %0.4f " % accTest)
   print('\n')
   # print("\nEnd demo \n")
+  return accTrain, accTest
    
 
 def testingFramework():
   minEpochs = 100
   maxEpochs = 1000
+  epochsStep = 100
   minHLNodes = 2
   maxHLNodes = 9
   learningRates = [0.005, 0.006, 0.007, 0.008, 0.009, 0.01, 0.02, 0.03]
+  testDataPercent = .20
+  
+  dataPath = "irisData.txt"
+  trainDataMatrix, testDataMatrix = loadFile(dataPath, testDataPercent)
 
-  # Iterate over iris data and generate traning data matrix and testing data matrix
+  accTrainResults = []
+  accTestResults = []
+  masterResults = []
 
-  # inFile=open("irisData.csv","r")
-  # lines = inFile.readlines()
-  # for line in lines:
-  #   print(line)
-
-  for epoch in range(minEpochs, maxEpochs, 100):
+  for epoch in range(minEpochs, maxEpochs, epochsStep):
     for node in range(minHLNodes, maxHLNodes):
       for learningRate in learningRates:
-        main(node, learningRate, epoch, 0, 0)
+        start=time.time()
+        tmpAccTrain, tempAccTest = main(node, learningRate, epoch, trainDataMatrix, testDataMatrix)
+        stop=time.time()
+        accTrainResults.append(tmpAccTrain)
+        accTestResults.append(tempAccTest)
+        # accTest, accTrain, nodes, learningRate, epoch
+        masterResults.append([tempAccTest, tmpAccTrain, node, learningRate, epoch])
+        print(sorted(masterResults, key=lambda x: x[0])[-1])
+
 
 
 
