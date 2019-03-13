@@ -1,3 +1,4 @@
+# Jason Argo & Seth Lugibihl
 #https://blogs.msdn.microsoft.com/uk_faculty_connection/2017/07/04/how-to-implement-the-backpropagation-using-python-and-numpy/
 # nn_backprop.py
 # Python 3.x
@@ -31,7 +32,7 @@ def loadFile(df, testDataPercent):
     testingList.append(resultList.pop(idx))
   
 
-  return np.asarray(resultList, dtype=np.float32), np.asarray(testingList, dtype=np.float32)  # not necessary
+  return np.asarray(resultList, dtype=np.float32), np.asarray(testingList, dtype=np.float32),testingListSize  # not necessary
 # end loadFile
   
 def showVector(v, dec):
@@ -350,7 +351,7 @@ class NeuralNetwork:
 
 # end class NeuralNetwork
 
-def main(hiddenLayerNodes, learningRate, epochs, trainDataMatrix, testDataMatrix):
+def main(hiddenLayerNodes, learningRate, epochs, trainDataMatrix, testDataMatrix, testSize):
   # print("\nBegin NN back-propagation demo \n")
   pv = sys.version
   npv = np.version.version 
@@ -386,40 +387,38 @@ def main(hiddenLayerNodes, learningRate, epochs, trainDataMatrix, testDataMatrix
   accTrain = nn.accuracy(trainDataMatrix)
   accTest = nn.accuracy(testDataMatrix)
   
-  print("Accuracy on 120-item train data = %0.4f " % accTrain)
-  print("Accuracy on 30-item test data   = %0.4f " % accTest)
+  print("Accuracy on "+str(150-testSize)+ "-item train data = %0.4f " % accTrain)
+  print("Accuracy on "+str(testSize)+ "-item test data   = %0.4f " % accTest)
   print('\n')
   # print("\nEnd demo \n")
   return accTrain, accTest
    
 
 def testingFramework():
-  minEpochs = 100
-  maxEpochs = 1000
-  epochsStep = 100
-  minHLNodes = 2
-  maxHLNodes = 9
-  learningRates = [0.005, 0.006, 0.007, 0.008, 0.009, 0.01, 0.02, 0.03]
-  testDataPercent = .20
-  
   dataPath = "irisData.txt"
-  trainDataMatrix, testDataMatrix = loadFile(dataPath, testDataPercent)
+
+  testDataPercents = [.1, .2, .3, .4]
+  HLNodes = [2, 3, 4, 5, 6, 7, 8, 9]
+  learningRates = [0.005, 0.007, 0.009, 0.01, 0.02, 0.03]
+  epochs = [10, 100, 150, 200]
 
   accTrainResults = []
   accTestResults = []
   masterResults = []
 
-  for epoch in range(minEpochs, maxEpochs, epochsStep):
-    for node in range(minHLNodes, maxHLNodes):
+  for testPercent in testDataPercents:
+    trainDataMatrix, testDataMatrix, testSize = loadFile(dataPath, testPercent)
+    for numNodes in HLNodes:
       for learningRate in learningRates:
-        start=time.time()
-        tmpAccTrain, tempAccTest = main(node, learningRate, epoch, trainDataMatrix, testDataMatrix)
-        stop=time.time()
-        accTrainResults.append(tmpAccTrain)
-        accTestResults.append(tempAccTest)
-        # accTest, accTrain, nodes, learningRate, epoch
-        masterResults.append([tempAccTest, tmpAccTrain, node, learningRate, epoch])
-        print(sorted(masterResults, key=lambda x: x[0])[-1])
+        for numEpochs in epochs:
+          start=time.time()
+          tmpAccTrain, tempAccTest = main(numNodes, learningRate, numEpochs, trainDataMatrix, testDataMatrix, testSize)
+          stop=time.time()
+          accTrainResults.append(tmpAccTrain)
+          accTestResults.append(tempAccTest)
+          # accTest, accTrain, nodes, learningRate, epoch
+          masterResults.append([tempAccTest, tmpAccTrain, numNodes, learningRate, numEpochs])
+          print(sorted(masterResults, key=lambda x: x[0])[-1])
 
 
 
