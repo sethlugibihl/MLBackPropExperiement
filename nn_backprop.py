@@ -28,7 +28,7 @@ def loadFile(df, testDataPercent):
   testingListSize = int(len(resultList)*testDataPercent)
 
   while len(testingList) < testingListSize:
-    idx = random.randint(0, len(resultList))
+    idx = random.randint(0, len(resultList))-1
     testingList.append(resultList.pop(idx))
   
 
@@ -377,9 +377,9 @@ def main(hiddenLayerNodes, learningRate, epochs, trainDataMatrix, testDataMatrix
   
   maxEpochs = epochs
   learnRate = learningRate
-  print("\nMax Epochs: " + str(maxEpochs))
-  print("Learning: %0.3f " % learnRate)
-  print("Hidden Nodes: " + str(hiddenLayerNodes))
+  # print("\nMax Epochs: " + str(maxEpochs))
+  # print("Learning: %0.3f " % learnRate)
+  # print("Hidden Nodes: " + str(hiddenLayerNodes))
   # print("\nStarting training")
   nn.train(trainDataMatrix, maxEpochs, learnRate)
   # print("Training complete")
@@ -387,9 +387,9 @@ def main(hiddenLayerNodes, learningRate, epochs, trainDataMatrix, testDataMatrix
   accTrain = nn.accuracy(trainDataMatrix)
   accTest = nn.accuracy(testDataMatrix)
   
-  print("Accuracy on "+str(150-testSize)+ "-item train data = %0.4f " % accTrain)
-  print("Accuracy on "+str(testSize)+ "-item test data   = %0.4f " % accTest)
-  print('\n')
+  # print("Accuracy on "+str(150-testSize)+ "-item train data = %0.4f " % accTrain)
+  # print("Accuracy on "+str(testSize)+ "-item test data   = %0.4f " % accTest)
+  # print('\n')
   # print("\nEnd demo \n")
   return accTrain, accTest
    
@@ -398,27 +398,45 @@ def testingFramework():
   dataPath = "irisData.txt"
 
   testDataPercents = [.1, .2, .3, .4]
-  HLNodes = [2, 3, 4, 5, 6, 7, 8, 9]
-  learningRates = [0.005, 0.007, 0.009, 0.01, 0.02, 0.03]
-  epochs = [10, 100, 150, 200]
+  HLNodes = [2, 3, 4, 5]
+  learningRates = [0.01, 0.015, 0.02, 0.025, 0.03, 0.035]
+  epochs = [100]
+  numSamples = 10
 
   accTrainResults = []
   accTestResults = []
   masterResults = []
 
   for testPercent in testDataPercents:
-    trainDataMatrix, testDataMatrix, testSize = loadFile(dataPath, testPercent)
     for numNodes in HLNodes:
       for learningRate in learningRates:
         for numEpochs in epochs:
-          start=time.time()
-          tmpAccTrain, tempAccTest = main(numNodes, learningRate, numEpochs, trainDataMatrix, testDataMatrix, testSize)
-          stop=time.time()
-          accTrainResults.append(tmpAccTrain)
-          accTestResults.append(tempAccTest)
+          trainErrorRates = []
+          testErrorRates = []
+          for i in range(numSamples):
+            trainDataMatrix, testDataMatrix, testSize = loadFile(dataPath, testPercent)
+            start=time.time()
+            tmpAccTrain, tempAccTest = main(numNodes, learningRate, numEpochs, trainDataMatrix, testDataMatrix, testSize)
+            stop=time.time()
+            print('Test Accuracy:', tempAccTest,' Train Accuracy:', tmpAccTrain)
+            trainErrorRates.append(tmpAccTrain)
+            testErrorRates.append(tempAccTest)
+          trainAvg = sum(trainErrorRates)/len(trainErrorRates)
+          testAvg = sum(testErrorRates)/len(testErrorRates)
+          accTrainResults.append(trainAvg)
+          accTestResults.append(testAvg)
           # accTest, accTrain, nodes, learningRate, epoch
-          masterResults.append([tempAccTest, tmpAccTrain, numNodes, learningRate, numEpochs])
+          masterResults.append([testAvg, trainAvg, numNodes, learningRate, numEpochs,testPercent])
           print(sorted(masterResults, key=lambda x: x[0])[-1])
+  print('\nTOP RESULTS')
+  print('----------------------')
+  print('Num Nodes:', sorted(masterResults, key=lambda x: x[0])[-1][2])
+  print('Learning Rate:', sorted(masterResults, key=lambda x: x[0])[-1][3])
+  print('Epochs:', sorted(masterResults, key=lambda x: x[0])[-1][4])
+  print('Test Percent:', sorted(masterResults, key=lambda x: x[0])[-1][5])
+  print('\nYielding: ')
+  print('Train Accuracy:', sorted(masterResults, key=lambda x: x[0])[-1][1])
+  print('Test Accuracy:', sorted(masterResults, key=lambda x: x[0])[-1][0])
 
 
 
