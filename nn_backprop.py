@@ -413,21 +413,27 @@ def testingFramework():
         for numEpochs in epochs:
           trainErrorRates = []
           testErrorRates = []
+          print('\nNodes:', numNodes)
+          print('Learning Rate:', learningRate)
+          print('Percent of Test Data:', testPercent)
+          print('Starting AVG Calc...\n')
           for i in range(numSamples):
             trainDataMatrix, testDataMatrix, testSize = loadFile(dataPath, testPercent)
             start=time.time()
             tmpAccTrain, tempAccTest = main(numNodes, learningRate, numEpochs, trainDataMatrix, testDataMatrix, testSize)
             stop=time.time()
-            print('Test Accuracy:', tempAccTest,' Train Accuracy:', tmpAccTrain)
+            print('Iteration: ', i, ' of', numSamples, ' Test Accuracy:', tempAccTest,' Train Accuracy:', tmpAccTrain)
             trainErrorRates.append(tmpAccTrain)
             testErrorRates.append(tempAccTest)
           trainAvg = sum(trainErrorRates)/len(trainErrorRates)
           testAvg = sum(testErrorRates)/len(testErrorRates)
+          print('Training avg: ', trainAvg)
+          print('Test avg: ', testAvg)
           accTrainResults.append(trainAvg)
           accTestResults.append(testAvg)
           # accTest, accTrain, nodes, learningRate, epoch
           masterResults.append([testAvg, trainAvg, numNodes, learningRate, numEpochs,testPercent])
-          print(sorted(masterResults, key=lambda x: x[0])[-1])
+          print('TOP SO FAR: ', sorted(masterResults, key=lambda x: x[0])[-1])
   print('\nTOP RESULTS')
   print('----------------------')
   print('Num Nodes:', sorted(masterResults, key=lambda x: x[0])[-1][2])
