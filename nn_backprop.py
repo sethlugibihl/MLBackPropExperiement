@@ -400,7 +400,7 @@ def testingFramework():
   testDataPercents = [.1, .2, .3, .4]
   HLNodes = [2, 3, 4, 5]
   learningRates = [0.01, 0.015, 0.02, 0.025, 0.03, 0.035]
-  epochs = [100]
+  epochs = [150]
   numSamples = 10
 
   accTrainResults = []
@@ -446,9 +446,9 @@ def testingFramework():
 
 
 
-
+start_time = time.time()
 testingFramework()
-
+print("--- %s seconds ---" % (time.time() - start_time))
 
 
 # end script
